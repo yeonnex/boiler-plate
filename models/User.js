@@ -57,7 +57,13 @@ userSchema.pre('save', function(next){
 })
 
 
-
+userSchema.methods.comparePassword = function(plainPassword, cb){
+    // plainPassword: abcd1234 암호화된비밀번호: $2b$10$7E3DTpylqPGvAjdHN1c9WeldQ36BtUfGMKa2381HOCHYavzdL.ISS
+    bcrypt.compare(plainPassword, this.password, function(err, isMatch){
+        if(err) return cb(err), // 비번이 같지 않다면 에러!
+            cb(null, isMatch) // 같다면, 콜백을 주는데, 에러는 없고(null), isMatch(True) 를 준다
+    })
+}
 
 
 const User = mongoose.model('User', userSchema)
