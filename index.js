@@ -32,7 +32,8 @@ app.post('/register', (req,res)=>{
     // 데이터베이스에 넣어준다
 
     const user = new User(req.body) // 바디파서때문에 가능!
-    
+
+    // save 하기 전에 비밀번호를 암호화시켜주어야 함. models/User.js에서 pre()라는 몽구스의 기능을 이용하자
     user.save((err,userInfo)=>{// save()메서드는 몽고디비에서 오는 메서드임!
         if(err) return res.json({success:false,err })
         return res.status(200).json({
