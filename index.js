@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 
 
 
-app.post('/register', (req,res)=>{
+app.post('/api/users/register', (req,res)=>{
     // 클라이언트에서 보내온 회원가입시의 정보들을
     // 데이터베이스에 넣어준다
 
@@ -44,7 +44,7 @@ app.post('/register', (req,res)=>{
     })
 }) 
 
-app.post('/login', (req, res)=>{
+app.post('/api/users/login', (req, res)=>{
     // 요청된 이메일이 데이터베이스에 있는지 찾는다
     User.findOne({email: req.body.email}, (err,user)=>{
         if(!user){
