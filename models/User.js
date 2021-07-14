@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
+const jwt = require('jsonwebtoken')
+
 // userSchema 에다 하나하나의 필드 작성! 
 const userSchema = mongoose.Schema({
     name:{
@@ -60,11 +62,28 @@ userSchema.pre('save', function(next){
 userSchema.methods.comparePassword = function(plainPassword, cb){
     // plainPassword: abcd1234 암호화된비밀번호: $2b$10$7E3DTpylqPGvAjdHN1c9WeldQ36BtUfGMKa2381HOCHYavzdL.ISS
     bcrypt.compare(plainPassword, this.password, function(err, isMatch){
-        if(err) return cb(err), // 비번이 같지 않다면 에러!
+        if(err) return cb(err); // 비번이 같지 않다면 에러!
             cb(null, isMatch) // 같다면, 콜백을 주는데, 에러는 없고(null), isMatch(True) 를 준다
     })
 }
 
+userSchema.methods.generateToken = function(cb){
+
+    // es5문법
+    var user = this;
+
+    // jsonwebtoken을 이용해서 token을 생성하기
+    var token = jwt.sign(user._id.toHexString(), 'secretToken')
+    // user._id + 'secretToken' = Token
+    // -> 'secretToken' -> user._id
+    // 토큰을 가지고 이사람이 누구인지 알 수 있게됨
+
+    user.token = token // userSchema에 "token"이라는 속성 있음. 거기다 저장!
+    user.save(function(err, user){
+        if(err) return cb(err) // 에러가 있다면 콜백으로 에러를 전달
+        cb(null, user) // 에러 없이 save가 잘 되었다면, user 정보만 다시 전달! 여기에는 토큰에 대한 정보도 들어있음
+    })
+}
 
 const User = mongoose.model('User', userSchema)
 module.exports = { User }

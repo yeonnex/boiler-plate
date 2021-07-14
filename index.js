@@ -2,14 +2,9 @@ const express = require('express')
 const app = express()
 const port = 5000
 const bodyParser = require('body-parser');
-const config = require('./config/key')
+const cookieParser = require('cookie-parser')
 
-const mongoose = require('mongoose')
-mongoose.set('useCreateIndex', true);
-mongoose.connect(config.mongoURI,{
-    useNewUrlParser: true, useUnifiedTopology: true,useUnifiedTopology: true 
-}).then(()=>console.log("MongoDB connected..."))
-    .catch(err => console.log(err))
+const config = require('./config/key')
 
 const { User } = require("./models/User")
 
@@ -18,7 +13,14 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 // application/json
 app.use(bodyParser.json());
+app.use(cookieParser());
 
+const mongoose = require('mongoose')
+mongoose.set('useCreateIndex', true);
+mongoose.connect(config.mongoURI,{
+    useNewUrlParser: true, useUnifiedTopology: true,useUnifiedTopology: true 
+}).then(()=>console.log("MongoDB connected..."))
+    .catch(err => console.log(err))
 
 
 app.get('/', (req, res) => {
@@ -42,7 +44,7 @@ app.post('/register', (req,res)=>{
     })
 }) 
 
-app.listen('/login', (req, res)=>{
+app.post('/login', (req, res)=>{
     // 요청된 이메일이 데이터베이스에 있는지 찾는다
     User.findOne({email: req.body.email}, (err,user)=>{
         if(!user){
@@ -55,10 +57,16 @@ app.listen('/login', (req, res)=>{
         user.comparePassword(req.body.password, (err, isMatch)=>{
             if(!isMatch)
             return res.json({loginSuccess: false, message: "비밀번호가 틀렸습니다"})
-        // 비밀번호까지 맞다면 그 유저를 위한 토큰을 생성하기
-        user.generateToken((err, user)=>{
-            
-        })
+            // 비밀번호까지 맞다면 그 유저를 위한 토큰을 생성하기
+            user.generateToken((err, user)=>{
+                // 여기의 user에는 generateToken()이 있는 User.js에서 생성된 유저의 토큰정보도 포함되어있음
+                if(err) return res.status(400).send(err);
+
+                // 토큰을 저장해서 보관해야 하는데... 어디에? 쿠키나, 로컬 스토리지 등... 쿠키에 하자!
+                res.cookie("x_auth", user.token)
+                .status(200)
+                .json({loginSuccess:true, userId: user._id})
+            })
 
         })
     })
