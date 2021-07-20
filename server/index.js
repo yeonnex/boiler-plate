@@ -58,6 +58,7 @@ app.post('/api/users/login', (req, res)=>{
         user.comparePassword(req.body.password, (err, isMatch)=>{
             if(!isMatch)
             return res.json({loginSuccess: false, message: "비밀번호가 틀렸습니다"})
+            
             // 비밀번호까지 맞다면 그 유저를 위한 토큰을 생성하기
             user.generateToken((err, user)=>{
                 // 여기의 user에는 generateToken()이 있는 User.js에서 생성된 유저의 토큰정보도 포함되어있음

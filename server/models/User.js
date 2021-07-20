@@ -35,7 +35,7 @@ const userSchema = mongoose.Schema({
 })
 
 // 유저 모델에 유저 정보를 저장하기 전에, 암호화!
-// next() 하면 index.js에서 save() 하는 곳으로 점프한다.
+// next() 하면 index.js의 save() 하는 곳으로 점프한다.
 userSchema.pre('save', function(next){
     var user = this;
     // 비밀번호를 바꿀때만 비밀번호를 암호화시킨다
